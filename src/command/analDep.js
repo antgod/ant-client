@@ -51,7 +51,7 @@ const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
   } else {
     const deps = traverseProject(depAbsoluteEntry, absoluteProject)
     const depLen = keys(deps).length
-    if (depLen > 3) {
+    if (depLen > 9) {
       log(chalk.yellow(`${absosultePath}模块过多依赖`))
     }
     currentModule = {
