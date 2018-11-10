@@ -8,7 +8,7 @@ The complete solution for project cli.
 $ npm install commander -g
 ```
 
-#### Used
+#### Usage
 ```
 $ cd [your project]
 $ ant-client analDep [entry]
