@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+const analDep = require('../src/command/analDep')
+const program = require('commander')
+// const { version } = require('../package')
+
+program.version('1')
+
+
+program
+  .command('analDep')
+  .option('-e, --entry', 'project entry')
+  .description('模块依赖分析，得到一颗依赖树')
+  .alias('ad')
+  .action(analDep)
+
+program.parse(process.argv)
+if (!program.args.length) {
+  program.help()
+}
