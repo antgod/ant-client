@@ -20,37 +20,71 @@ $ ant-client ad
 
 - exmaple
 ```
-$ cd crm
-$ ant-client ad ./src/index
+$ cd simple-process
+$ ant-client ad ./src/page/index
 ```
 
 - output
 ```json
+/Users/lihongji/study/ant-datasource/src/test1文件不存在
+ant-datasource/src/index模块过多依赖
+ant-datasource/src/test模块过多依赖
+模块列表
+ant-datasource/src/exist,ant-datasource/src/utils,ant-datasource/src/in.less,ant-datasource/src/test,ant-datasource/src/index,ant-datasource/src/test1,ant-datasource/node_modules/babel-eslint,ant-datasource/src/k/a.png
+模块数量
+8
+模块依赖树
 {
   "./exist": {
-    "absosulte": "crm/src/exist",
-    "nodeModule": false,
+    "absosultePath": "ant-datasource/src/exist",
     "deps": {
       "./utils": {
-        "absosulte": "crm/src/utils",
-        "nodeModule": false,
-        "deps": {}
+        "absosultePath": "ant-datasource/src/utils",
+        "deps": {},
+        "depLen": 0
       }
-    }
+    },
+    "depLen": 1
   },
-  "./index.less": {
-    "absosulte": "crm/src/index.less",
-    "nodeModule": false,
-    "deps": {}
+  "./in.less": {
+    "absosultePath": "ant-datasource/src/in.less",
+    "deps": {},
+    "depLen": 0
   },
-  "babel-eslint": {
-    "absosulte": "crm/node_modules/babel-eslint",
-    "nodeModule": true
+  "./test": {
+    "absosultePath": "ant-datasource/src/test",
+    "deps": {
+      "absosultePath": "ant-datasource/src/in.less",
+      "deps": {},
+      "depLen": 0,
+      "./index": {
+        "absosultePath": "ant-datasource/src/index",
+        "deps": {
+          "absosultePath": "ant-datasource/src/in.less",
+          "deps": {},
+          "depLen": 0,
+          "tip": "循环引用",
+          "./test1": {
+            "absosultePath": "ant-datasource/src/test1",
+            "deps": {},
+            "depLen": 0
+          },
+          "babel-eslint": {
+            "absosultePath": "ant-datasource/node_modules/babel-eslint"
+          },
+          "./k/a.png": {
+            "absosultePath": "ant-datasource/src/k/a.png",
+            "deps": {},
+            "depLen": 0
+          }
+        },
+        "depLen": 7
+      }
+    },
+    "depLen": 4
   },
-  "./asset/img/banner.png": {
-    "absosulte": "crm/src/asset/img/banner.png",
-    "nodeModule": false,
-    "deps": {}
-  }
+  "absosultePath": "ant-datasource/src/k/a.png",
+  "deps": {},
+  "depLen": 0
 }
 ```

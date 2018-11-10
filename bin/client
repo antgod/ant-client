@@ -4,8 +4,6 @@ const program = require('commander')
 // const { version } = require('../package')
 
 program.version('1')
-
-
 program
   .command('analDep')
   .option('-e, --entry', 'project entry')

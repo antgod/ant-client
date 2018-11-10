@@ -36,7 +36,13 @@ const DEFAULT_BROWER = ['window', 'alert', 'document', 'Math', 'location', 'hist
 ]
 
 const DEFAULT_NODE = ['require', 'module', 'exports']
-const DEFAULT_PLUGINS = ['objectRestSpread']
+const DEFAULT_PLUGINS = [
+  'objectRestSpread', 
+  'jsx', 
+  'classProperties', 
+  'decorators-legacy',
+  'dynamicImport',
+]
 const DEFAULT_SOURCE_TYPE = 'module'
 
 module.exports = {
