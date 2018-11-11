@@ -44,12 +44,11 @@ const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
 
   let mod = mods[absosultePath]
   if (mod) {
-    return mod.load ? { tip: '循环引用' } : mod.module
+    return { [dep]: mod.load ? { tip: '循环引用' } : mod.module }
   }
   mod = mods[absosultePath] = { load: true }
 
   let currentModule
-  
   if (isNpmModule) {
     currentModule = {
       absosultePath,
@@ -70,7 +69,7 @@ const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
   
   mod.module = currentModule
   mod.load = false
-  return { [dep]: currentModule}
+  return { [dep]: currentModule }
 }
 
 const traverseProject = (absoluteEntry, absoluteProject) => {
@@ -119,6 +118,23 @@ function fileMods (code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_P
   return dependencies
 }
 
+const analysisDepTree = (depTree) => {
+  const { deps = {} } = depTree
+  const finalDepTree = keys(deps).reduce((last, key) => {
+    const mod =  deps[key]
+    const { deps: childDeps } = mod
+    let merged
+    if (childDeps) {
+      merged = { [key]: analysisDepTree(mod) }
+    } else {
+      merged = { nodeModules: (last.nodeModules || []).concat(key) }
+    }
+    return assign(last, merged) 
+  }, {}) 
+  depTree.deps = finalDepTree
+  return depTree
+}
+
 const output = (list, npmList, depTree, options) => {
   const { o: output } = options
   const print = () => {
@@ -132,7 +148,7 @@ const output = (list, npmList, depTree, options) => {
     log(chalk.yellow(npmList.length))
   }
 
-  const depsStr = JSON.stringify(depTree, null, 2)
+  const depsStr = JSON.stringify(analysisDepTree({ deps: depTree }), null, 2)
   switch(output) {
     case OUTPUT_TYPE.CONSOLE: 
       print()
