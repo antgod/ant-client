@@ -11,7 +11,7 @@ $ npm install commander -g
 #### Usage
 ```
 $ cd [your project]
-$ ant-client analDep [entry]
+$ ant-client analDep [-e entry] [-o output]
 ``` 
 or you can use alias parameter
 ```
@@ -20,12 +20,12 @@ $ ant-client ad
 
 - exmaple
 ```
-$ cd simple-process
-$ ant-client ad ./src/page/index
+$ cd ant-datasource
+$ ant-client ad -e src/index -o f
 ```
 
 - output
-```json
+```bash
 /Users/lihongji/study/ant-datasource/src/test1文件不存在
 ant-datasource/src/index模块过多依赖
 ant-datasource/src/test模块过多依赖
@@ -33,7 +33,10 @@ ant-datasource/src/test模块过多依赖
 ant-datasource/src/exist,ant-datasource/src/utils,ant-datasource/src/in.less,ant-datasource/src/test,ant-datasource/src/index,ant-datasource/src/test1,ant-datasource/node_modules/babel-eslint,ant-datasource/src/k/a.png
 模块数量
 8
-模块依赖树
+```
+
+- deptree: deps.json
+```json
 {
   "./exist": {
     "absosultePath": "ant-datasource/src/exist",
@@ -88,3 +91,7 @@ ant-datasource/src/exist,ant-datasource/src/utils,ant-datasource/src/in.less,ant
   "depLen": 0
 }
 ```
+
+#### todolist
+- analyse needless dependencies of package.json.
+- analyse file dependencies order.

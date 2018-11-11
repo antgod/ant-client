@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const yargs = require('yargs')
 const babel = require('@babel/parser')
 const traverse = require('@babel/traverse').default
 const types = require('babel-types')
@@ -12,8 +13,13 @@ const REQUIRE = 'require'
 const DEFAULT_ENTRY = './src/index'
 const DEFAULT_ALIAS = ['.js', '.jsx', '.json']
 const NODE_MODULES = 'node_modules'
+const OUTPUT_TYPE = { CONSOLE: 'c', FILE: 'f' }
 
+// npm模块列表
+const npms = {}
+// 所有依赖模块列表
 const mods = {}
+
 const analyseEntry = (absoluteProject, entry) => {
   if (entry) {
     return resolve(absoluteProject, entry)
@@ -48,16 +54,17 @@ const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
     currentModule = {
       absosultePath,
     }
+    npms[dep] = absosultePath
   } else {
     const deps = traverseProject(depAbsoluteEntry, absoluteProject)
-    const depLen = keys(deps).length
-    if (depLen > 9) {
+    const depCount = keys(deps).length
+    if (depCount > 9) {
       log(chalk.yellow(`${absosultePath}模块过多依赖`))
     }
     currentModule = {
       absosultePath,
       deps,
-      depLen,
+      depCount,
     }
   }
   
@@ -75,13 +82,13 @@ const traverseProject = (absoluteEntry, absoluteProject) => {
       code = fs.readFileSync(absoluteEntry)
     } else {
       const isExist = fs.existsSync(absoluteEntry)
-      const isDirectory = isExist ? fs.lstatSync(absoluteEntry).isDirectory() : false
+      let ext = DEFAULT_ALIAS.find(ext => fs.existsSync(`${absoluteEntry}${ext}`))
+      const isDirectory = !ext && isExist ? fs.lstatSync(absoluteEntry).isDirectory() : false
       if (isDirectory) {
         isDir = true
         ext = DEFAULT_ALIAS.find(ext => fs.existsSync(`${absoluteEntry}/index${ext}`))
         code = fs.readFileSync(`${absoluteEntry}/index${ext}`)
       } else {
-        ext = DEFAULT_ALIAS.find(ext => fs.existsSync(`${absoluteEntry}${ext}`))
         code = fs.readFileSync(`${absoluteEntry}${ext}`)
       }
     }
@@ -112,20 +119,54 @@ function fileMods (code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_P
   return dependencies
 }
 
+const output = (list, npmList, depTree, options) => {
+  const { o: output } = options
+  const print = () => {
+    log(chalk.red.bold('模块列表'))
+    log(chalk.cyan(list))
+    log(chalk.red.bold('模块数量'))
+    log(chalk.yellow(list.length))
+    log(chalk.red.bold('npm模块'))
+    log(chalk.cyan(npmList))
+    log(chalk.red.bold('npm模块数量'))
+    log(chalk.yellow(npmList.length))
+  }
+
+  const depsStr = JSON.stringify(depTree, null, 2)
+  switch(output) {
+    case OUTPUT_TYPE.CONSOLE: 
+      print()
+      log(chalk.red.bold('模块依赖树'))
+      log(chalk.green(depsStr))
+      break;
+    case OUTPUT_TYPE.FILE:
+      print()
+      const outputFile = resolve(process.cwd(), 'deps.json')
+      fs.writeFileSync(outputFile, depsStr)
+      break;
+    default: 
+      log(chalk.red('输入参数错误'))
+  }
+}
+
+const computeArgs = () => {
+  const { e, o = OUTPUT_TYPE.CONSOLE } = yargs.argv
+  if (e === true || o === true) {
+    log(chalk.red('输入参数错误'))
+    process.exit(0)
+  }
+  return { e, o }
+}
+
 const projectMods = () => {
-  const entry = process.argv[3]
+  const { e: entry, o } = computeArgs()
   const absoluteProject = process.cwd()
   const absoluteEntry = analyseEntry(absoluteProject, entry)
   const depTree = traverseProject(absoluteEntry, absoluteProject)
-
   const list = keys(mods)
-  log(chalk.red.bold('模块列表'))
-  log(chalk.cyan(list))
-  log(chalk.red.bold('模块数量'))
-  log(chalk.yellow(list.length))
-  log(chalk.red.bold('模块依赖树'))
-  log(chalk.green(JSON.stringify(depTree, null, 2)))
-  return {list, depTree }
+  const npmList = keys(npms)
+  output(list, npmList, depTree, { o })
+  return { list, depTree, npmList }
 }
 
 module.exports = projectMods

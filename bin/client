@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 const analDep = require('../src/command/analDep')
 const program = require('commander')
-// const { version } = require('../package')
+const { version } = require('../package')
+const yargs = require('yargs')
 
-program.version('1')
 program
+  .version(version)
   .command('analDep')
-  .option('-e, --entry', 'project entry')
+  .option('-e', 'project entry')
+  .option('-o', 'f:file;c:console')
   .description('模块依赖分析，得到一颗依赖树')
   .alias('ad')
   .action(analDep)
 
 program.parse(process.argv)
-if (!program.args.length) {
+
+if (!yargs.argv._.length) {
   program.help()
 }
