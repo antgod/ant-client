@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const analDep = require('../src/command/analDep')
+const analInteraction = require('../src/command/analInteraction')
 const program = require('commander')
 const { version } = require('../package')
 const yargs = require('yargs')
@@ -12,6 +13,16 @@ program
   .description('模块依赖分析，得到一颗依赖树')
   .alias('ad')
   .action(analDep)
+
+program
+  .version(version)
+  .command('analInteraction')
+  .option('-e', 'project entry')
+  .option('-f', 'frame')
+  .option('-o', 'f:file;c:console')
+  .description('模块依赖分析，得到一颗依赖树')
+  .alias('aia')
+  .action(analInteraction)
 
 program.parse(process.argv)
 

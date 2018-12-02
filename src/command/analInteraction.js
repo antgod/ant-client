@@ -14,7 +14,6 @@ const DEFAULT_ENTRY = './src/index'
 const DEFAULT_ALIAS = ['.js', '.jsx', '.json']
 const NODE_MODULES = 'node_modules'
 const OUTPUT_TYPE = { CONSOLE: 'c', FILE: 'f' }
-const NPMS = 'npms'
 
 // npm模块列表
 const npms = {}
@@ -39,33 +38,23 @@ const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
   // 是否是npm模块
   const isNpmModule = npmModule(dep)
 
-  const absolutePath = isNpmModule ?
+  const absosultePath = isNpmModule ?
     join(basename(absoluteProject), NODE_MODULES, dep) :
     depAbsoluteEntry.substr(projectNameIndex)
 
-  let mod = mods[absolutePath]
+  let mod = mods[absosultePath]
   if (mod) {
     return { [dep]: mod.load ? { tip: '循环引用' } : mod.module }
   }
-  mod = mods[absolutePath] = { load: true }
+  mod = mods[absosultePath] = { load: true }
 
   let currentModule
-  if (isNpmModule) {
-    currentModule = {
-      absolutePath,
-    }
-    npms[dep] = absolutePath
-  } else {
-    const deps = traverseEntry(depAbsoluteEntry, absoluteProject)
-    const depCount = keys(deps).length
-    if (depCount > 9) {
-      log(chalk.yellow(`${absolutePath}模块过多依赖`))
-    }
-    currentModule = {
-      absolutePath,
-      deps,
-      depCount,
-    }
+  const deps = traverseEntry(depAbsoluteEntry, absoluteProject)
+  const depCount = keys(deps).length
+  currentModule = {
+    absosultePath,
+    deps,
+    depCount,
   }
   
   mod.module = currentModule
@@ -99,10 +88,11 @@ const traverseEntry = (absoluteEntry, absoluteProject) => {
   return deps.reduce((last, dep) => assign(last, requireCompute(dep, isDir, absoluteEntry, absoluteProject), {}), {})
 }
 
-function fileMods (code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_PLUGINS } = {}) {
+function fileMods(code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_PLUGINS } = {}) {
   const ast = babel.parse(code, {
     sourceType,
-  plugins})
+    plugins
+  })
   const dependencies = []
   traverse(ast, {
     Literal(path) {
@@ -119,71 +109,22 @@ function fileMods (code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_P
   return dependencies
 }
 
-const analysisDepTree = (depTree) => {
-  const { deps = {} } = depTree
-  const finalDepTree = keys(deps).reduce((last, key) => {
-    const mod =  deps[key]
-    const { deps: childDeps } = mod
-    let merged
-    if (childDeps) {
-      merged = { [key]: analysisDepTree(mod) }
-    } else {
-      merged = { [NPMS]: (last[NPMS] || []).concat(key === NPMS ? [...mod] : key) }
-    }
-    return assign(last, merged) 
-  }, {}) 
-  depTree.deps = finalDepTree
-  return depTree
-}
-
-const output = (list, npmList, depTree, options) => {
-  const { o: output } = options
-  const print = () => {
-    log(chalk.red.bold('模块列表'))
-    log(chalk.cyan(list))
-    log(chalk.red.bold('模块数量'))
-    log(chalk.yellow(list.length))
-    log(chalk.red.bold('npm模块'))
-    log(chalk.cyan(npmList))
-    log(chalk.red.bold('npm模块数量'))
-    log(chalk.yellow(npmList.length))
-  }
-
-  const depsStr = JSON.stringify(analysisDepTree({ deps: depTree }), null, 2)
-  switch(output) {
-    case OUTPUT_TYPE.CONSOLE: 
-      print()
-      log(chalk.red.bold('模块依赖树'))
-      log(chalk.green(depsStr))
-      break;
-    case OUTPUT_TYPE.FILE:
-      print()
-      const outputFile = resolve(process.cwd(), 'deps.json')
-      fs.writeFileSync(outputFile, depsStr)
-      break;
-    default: 
-      log(chalk.red('输入参数错误'))
-  }
-}
-
 const computeArgs = () => {
-  const { e, o = OUTPUT_TYPE.CONSOLE } = yargs.argv
-  if (e === true || o === true) {
+  const { e, o = OUTPUT_TYPE.CONSOLE, f } = yargs.argv
+  if (e === true || o === true || f === true) {
     log(chalk.red('输入参数错误'))
     process.exit(0)
   }
-  return { e, o }
+  return { e, o, f }
 }
 
 const projectMods = () => {
-  const { e: entry, o } = computeArgs()
+  const { e: entry, o, f } = computeArgs()
   const absoluteProject = process.cwd()
-  const absoluteEntry = analyseEntry(absoluteProject, entry)
-  const depTree = traverseEntry(absoluteEntry, absoluteProject)
-  const list = keys(mods)
-  const npmList = keys(npms)
-  output(list, npmList, depTree, { o })
-  return { list, depTree, npmList }
+  
+  const entryPath = resolve(absoluteProject, entry)
+  traverseEntry(entryPath, absoluteProject)
+  console.log(entryPath);
 }
 
 module.exports = projectMods
