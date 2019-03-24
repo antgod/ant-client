@@ -1,0 +1,46 @@
+@import (reference) "../../../common/common.less";
+
+@wrapper: ~"@{prefix}-apply";
+
+.@{wrapper} {
+  width: 100%;
+  min-height: 500px;
+  background-color: @white;
+  overflow: hidden;
+
+  &-container {
+    padding: 0 350px;
+  }
+
+  &-flex {
+    .display-flex();
+    width: 300px;
+    &-input {
+      width: 100px;
+    }
+  }
+
+  &-account {
+    &-input {
+      width: 220px;
+    }
+  }
+
+  &-apply {
+    text-align: center;
+    &-icon {
+      font-size: 8 * @gap;
+      color: #008FE5;
+      margin-top: 100px;
+    }
+    &-title {
+      font-size: 16px;
+      margin: 4 * @gap;
+      color: #666;
+    }
+    &-content {
+      width: 520px;
+      margin: 0 auto;
+    }
+  }
+}

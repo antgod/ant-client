@@ -1,0 +1,39 @@
+@import "../common/common.less";
+@import "../common/patch.less";
+
+.react-content {
+  color: @common;
+  font-size: @font-size;
+  .item-gap-bottom {
+    margin-bottom: @gap;
+  }
+
+  .item-block {
+    margin: 0 3 * @gap;
+  }
+
+  .item-inner {
+    .box-sizing(border-box);
+    padding: 4 * @gap 3 * @gap;
+  }
+
+  .link {
+    color: #108EE9;
+  }
+
+  .gray {
+    color: @gray;
+  }
+
+  .orange {
+    color: @orange;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .error {
+    color: @error-color;
+  }
+}

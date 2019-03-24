@@ -1,130 +1,177 @@
+const { plugins } = require('ant-util')
 const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const babel = require('@babel/parser')
 const traverse = require('@babel/traverse').default
 const types = require('babel-types')
-const { log, chalk } = require('../common/log')
-const { DEFAULT_PLUGINS, DEFAULT_SOURCE_TYPE } = require('../common/constant')
+const {
+  log,
+  chalk
+} = require('../common/log')
+const {
+  DEFAULT_PLUGINS,
+  DEFAULT_SOURCE_TYPE
+} = require('../common/constant')
+const { set, get } = plugins.exist
 
-const { assign, keys } = Object
-const { basename, resolve, dirname, extname, join } = path
+const {
+  assign,
+  keys
+} = Object
+const {
+  basename,
+  resolve,
+  dirname,
+  extname,
+  join
+} = path
 const REQUIRE = 'require'
 const DEFAULT_ENTRY = './src/index'
 const DEFAULT_ALIAS = ['.js', '.jsx', '.json']
-const NODE_MODULES = 'node_modules'
-const OUTPUT_TYPE = { CONSOLE: 'c', FILE: 'f' }
+const OUTPUT_TYPE = {
+  CONSOLE: 'c',
+  FILE: 'f'
+}
 
-// npm模块列表
-const npms = {}
+const value = 's@value'
+
 // 所有依赖模块列表
 const mods = {}
-
-const analyseEntry = (absoluteProject, entry) => {
-  if (entry) {
-    return resolve(absoluteProject, entry)
-  }
-  return resolve(absoluteProject, DEFAULT_ENTRY)
+const SEP = '_'
+const GLOBAL = 'global'
+const NODE_TYPES = {
+  PROGRAM: 'Program',
+  FUNCTION_DECLARATION: 'FunctionDeclaration',
+  FUNCTION_EXPRESSION: 'FunctionExpression',
+  EXPRESSION_STATEMENT: 'ExpressionStatement',
+  ARROW_FUNCTION_EXPRESSION: 'ArrowFunctionExpression',
+  CALL_EXPRESSION: 'CallExpression',
+  CONDITIONAL_EXPRESSION: 'ConditionalExpression',
+  TEMPLATE_LITERAL: 'TemplateLiteral',
+  BINARY_EXPRESSION: 'BinaryExpression',
+  VARIABLE_DECLARATOR: 'VariableDeclarator',
+  ASSIGNMENT_EXPRESSION: 'AssignmentExpression',
+  MEMBER_EXPRESSION: 'MemberExpression',
+  SPREAD_ELEMENT: 'SpreadElement',
+  ARRAY_EXPRESSION: 'ArrayExpression', // [a]
+  OBJECT_PROPERTY: 'ObjectProperty', // { a }
+  NEW_EXPRESSION: 'NewExpression', // new
+  RETURN_STATEMENT: 'ReturnStatement', // return xxx
+  // UNARY_EXPRESSION: 'UnaryExpression',     // typeof
+  // ARRAY_PATTERN: 'ArrayPattern',           // var [a]
 }
 
-const npmModule = (dep) => {
-  return dep.indexOf('./') === -1
-}
-
-const requireCompute = (dep, isDir, absoluteEntry, absoluteProject) => {
-  const absolutePrefix = isDir ? absoluteEntry : dirname(absoluteEntry)
-  const depAbsoluteEntry = resolve(absolutePrefix, dep)
-  const projectNameIndex = absoluteProject.length - basename(absoluteProject).length
-  // 是否是npm模块
-  const isNpmModule = npmModule(dep)
-
-  const absosultePath = isNpmModule ?
-    join(basename(absoluteProject), NODE_MODULES, dep) :
-    depAbsoluteEntry.substr(projectNameIndex)
-
-  let mod = mods[absosultePath]
-  if (mod) {
-    return { [dep]: mod.load ? { tip: '循环引用' } : mod.module }
-  }
-  mod = mods[absosultePath] = { load: true }
-
-  let currentModule
-  const deps = traverseEntry(depAbsoluteEntry, absoluteProject)
-  const depCount = keys(deps).length
-  currentModule = {
-    absosultePath,
-    deps,
-    depCount,
-  }
-  
-  mod.module = currentModule
-  mod.load = false
-  return { [dep]: currentModule }
-}
-
-const traverseEntry = (absoluteEntry, absoluteProject) => {
-  const extName = extname(absoluteEntry)
-  let code = ''
-  let isDir = false
-  try {
-    if (extName) {
-      code = fs.readFileSync(absoluteEntry)
-    } else {
-      const isExist = fs.existsSync(absoluteEntry)
-      let ext = DEFAULT_ALIAS.find(ext => fs.existsSync(`${absoluteEntry}${ext}`))
-      const isDirectory = !ext && isExist ? fs.lstatSync(absoluteEntry).isDirectory() : false
-      if (isDirectory) {
-        isDir = true
-        ext = DEFAULT_ALIAS.find(ext => fs.existsSync(`${absoluteEntry}/index${ext}`))
-        code = fs.readFileSync(`${absoluteEntry}/index${ext}`)
-      } else {
-        code = fs.readFileSync(`${absoluteEntry}${ext}`)
+const traversePath = (path, hundles) => {
+  debugger
+  for (const key in path) {
+    const item = path[key]
+    if (typeof item === 'object' && item !== null) {
+      traversePath(item, hundles)
+      if (hundles[item.type]) {
+        debugger
+        hundles[item.type](item)
       }
+     
     }
-  } catch(e) {
-    log(chalk.red(`${absoluteEntry}文件不存在`))
   }
-  const deps = extName ? [] : fileMods(code.toString())
-  return deps.reduce((last, dep) => assign(last, requireCompute(dep, isDir, absoluteEntry, absoluteProject), {}), {})
 }
 
-function fileMods(code, { sourceType = DEFAULT_SOURCE_TYPE, plugins = DEFAULT_PLUGINS } = {}) {
+const analysisExecPaths = (path) => {
+  const paths = []
+  if (!path) {
+    return []
+  } else
+  if (path.type === NODE_TYPES.PROGRAM) {
+    return [GLOBAL]
+  } else if (path.type === NODE_TYPES.FUNCTION_DECLARATION) {
+    paths.push(path.node.id.name)
+  } else if (path.type === NODE_TYPES.ARROW_FUNCTION_EXPRESSION || path.type === NODE_TYPES.FUNCTION_EXPRESSION) {
+    paths.push(path.parentPath.node.id.name)
+  } else if (path.type === NODE_TYPES.FUNCTION_DECLARATION) {
+    paths.push(path.node.id.name)
+  }
+  const res = analysisExecPaths(path.parentPath).concat(paths)
+  return res
+}
+
+
+function parseOnClick(code, {
+  sourceType = DEFAULT_SOURCE_TYPE,
+  plugins = DEFAULT_PLUGINS
+} = {}) {
+  // console.log(code)
   const ast = babel.parse(code, {
     sourceType,
     plugins
   })
-  const dependencies = []
-  traverse(ast, {
-    Literal(path) {
-      const parentNode = path.parent
-      if (types.isImportDeclaration(parentNode)) {
-        dependencies.push(path.node.value)
-      }
 
-      if (types.isCallExpression(parentNode) && parentNode.callee.name === REQUIRE) {
-        dependencies.push(path.node.value)
-      }
+  const envs = {}
+  // debugger
+  traverse(ast, {
+    FunctionDeclaration(path) {
+      // const execEnv = analysisExecPaths(path).join(SEP)
+      // console.log(execEnv)
+    },
+    BlockStatement(path) {
+      // const execEnv = analysisExecPaths(path).join(SEP)
+      // console.log(execEnv)
+    },
+    ArrowFunctionExpression(path) {
+      set(envs, analysisExecPaths(path).concat(value), path)
     }
   })
-  return dependencies
+
+  traverse(ast, {
+    ArrowFunctionExpression(path) {
+
+    },
+    ExportDefaultDeclaration(path) {
+      const entryDir = [GLOBAL, path.node.declaration.name]
+      const entry = entryDir.concat(value)
+      const entryPath = get(envs, entry)
+      console.log(traverseFunction(entryPath, envs, [entryDir.join(SEP)]))
+    },
+    Identifier(path) {
+
+    }
+  })
+  return
 }
 
-const computeArgs = () => {
-  const { e, o = OUTPUT_TYPE.CONSOLE, f } = yargs.argv
-  if (e === true || o === true || f === true) {
-    log(chalk.red('输入参数错误'))
-    process.exit(0)
+const getFnEnv = (envs, paths, callFunctionName) => {
+  if (!paths || !paths.length) {
+    return []
   }
-  return { e, o, f }
+
+  const functions = get(envs, paths)
+  const parentPath = paths.splice(0, paths.length - 1)
+  return functions[callFunctionName] ? paths : getFnEnv(envs, parentPath, callFunctionName)
 }
 
-const projectMods = () => {
-  const { e: entry, o, f } = computeArgs()
+function traverseFunction(path, envs, output) {
+  const paths = analysisExecPaths(path)
+
+  traversePath(path, {
+    CallExpression(node) {
+      // const callFunctionName = node.callee.name
+      // const fnEnv = getFnEnv(envs, paths, callFunctionName)
+      // const fnPath = fnEnv.concat(callFunctionName)
+      // output.push(fnPath.join(SEP))
+      // traverseFunction(`${GLOBAL}_${name}`, envs, output)
+    }
+  })
+  return output.join('->')
+}
+
+const projectMods = (path) => {
+  // const { e: entry, o, f } = computeArgs()
   const absoluteProject = process.cwd()
-  
-  const entryPath = resolve(absoluteProject, entry)
-  traverseEntry(entryPath, absoluteProject)
-  console.log(entryPath);
+  const entryPath = resolve(absoluteProject, path)
+  const code = fs.readFileSync(entryPath + '.js')
+  parseOnClick(code.toString())
 }
 
 module.exports = projectMods
+
+projectMods('./src/command/test')

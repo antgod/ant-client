@@ -1,0 +1,25 @@
+@import (reference) "../../../common/common.less";
+
+@wrapper: ~"@{prefix}-route";
+
+.@{wrapper} {
+  width: 100%;
+  min-height: 500px;
+  background-color: @white;
+  overflow: hidden;
+  padding: 2 * @gap;
+
+  &-apply {
+    text-align: center;
+    &-img {
+      margin-top: 100px;
+      width: 252px;
+      height: 160px;
+    }
+    &-text {
+      font-size: 16px;
+      margin: 4 * @gap;
+      color: #666;
+    }
+  }
+}

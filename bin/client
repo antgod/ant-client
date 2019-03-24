@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const analDep = require('../src/command/analDep')
+const analDepCommon = require('../src/command/analDep')
 const analInteraction = require('../src/command/analInteraction')
 const program = require('commander')
 const { version } = require('../package')
@@ -13,6 +14,16 @@ program
   .description('模块依赖分析，得到一颗依赖树')
   .alias('ad')
   .action(analDep)
+
+ program
+  .version(version)
+  .command('analDepCommon')
+  .option('-e', 'project entry')
+  .option('-o', 'f:file;c:console')
+  .description('模块依赖分析，得到一颗依赖树')
+  .alias('adc')
+  .action(analDepCommon)
+
 
 program
   .version(version)

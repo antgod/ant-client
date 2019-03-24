@@ -1,0 +1,90 @@
+@import (reference) "../../../common/common.less";
+
+@wrapper: ~"@{prefix}-list";
+
+.@{wrapper} {
+  background-color: @white;
+
+  &-float {
+    float: left;
+    height: 42px;
+    &-img {
+      height: 42px;
+      margin-right: @gap;
+    }
+  }
+
+  &-aduit-reject {
+    color: @error-color;
+  }
+
+  &-link {
+    margin-left: @gap;
+  }
+
+  &-input {
+    width: 50%;
+  }
+
+  &-link-download {
+    margin-left: @gap;
+  }
+
+  &-unit {
+    margin-left: @gap;
+  }
+
+  &-apply {
+    text-align: center;
+    &-img {
+      width: 252px;
+      height: 160px;
+    }
+    &-text {
+      font-size: 16px;
+      margin: 4 * @gap;
+      color: #666;
+    }
+  }
+
+  &-select {
+    width: 160px !important;
+    &:first-child{
+      margin-right: 4px;
+    }
+  }
+
+  &-select-info {
+    font-size: 12px;
+  }
+
+  &-sku-name {
+    width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  &-button {
+    border-radius: @button-border-radius;
+  }
+
+  &-button-forbid {
+    border-radius: 4px !important;
+    color: #FFF !important;
+    background-color: #9B9B9B !important;
+  }
+
+  &-footer {
+    margin: 10px 0;
+    border-radius: 0 0 4px 4px;
+  }
+
+  &-button-right {
+    margin-left: @gap;
+  }
+
+  &-row {
+    height: 31px;
+  }
+}

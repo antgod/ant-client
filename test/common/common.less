@@ -1,0 +1,115 @@
+@import "./patch.less";
+@prefix: asset;
+
+// Size
+@gap: 8px;
+@gap-large: 16px;
+@font-size-small: 12px;
+@font-size: 14px;
+@font-size-large: 16px;
+@font-size-title: 36px;
+
+// Color
+@bg-color: #EBECED;
+@back-color: #F7F7F7;
+@block-color: #fff;
+@border-color: #EEEFEF;
+@highlight-color: #ff6600;
+@black: #444444;
+@white: #fff;
+@gray: #999;
+@common: #333;
+@orange: #E84A10;
+@error-color: #FF7777;
+@link-color: #108EE9;
+
+// Border
+@button-border-radius: 2px;
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+  font-size: 0;
+}
+.clearfix { *zoom: 1; }
+
+.ellipsis(@width) {
+  max-width: @width;
+  white-space: nowrap;
+  word-break: keep-all;
+  word-wrap: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ellipsis-multical(@row) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -ms-box-orient: vertical;
+  -webkit-line-clamp: @row;
+  -ms-line-clamp: @row;
+  overflow: hidden;
+}
+
+.display-flex {
+  .clearfix();
+  display: table-cell; // ie9
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.flex(@number) {
+  -webkit-box-flex:@number;
+  -webkit-flex:@number;
+  -ms-flex:@number;
+  flex:@number;
+  float: left;
+}
+
+.flex-wrap {
+  -ms-flex-wrap:wrap;
+  -webkit-flex-wrap:wrap;
+  flex-wrap: wrap;
+}
+
+.box-shadow(@x:0px, @y:0px, @shadow:0px, @color: @block-color){
+  box-shadow: @x @y @shadow @color;
+  -webkit-box-shadow: @x @y @shadow @color;
+  -moz-box-shadow: @x @y @shadow @color;
+}
+
+.box-sizing(@sizing) {
+  -moz-box-sizing:@sizing;
+  -webkit-box-sizing:@sizing;
+  box-sizing:@sizing;
+}
+
+.gradient(@source, @target, @dirstart, @dirend, @type: linear){
+  background: @source; /* 一些不支持背景渐变的浏览器 */
+  background:-ms-linear-gradient(@type, @dirstart, @source, @target);
+  background:-moz-linear-gradient(@type, @dirstart, @source, @target);
+  background:-webkit-gradient(@type, @dirstart, @dirend, from(@source), to(@target));
+  background:-o-linear-gradient(@type, @dirstart, @source, @target);
+}
+
+.transform(@args) {
+  transform: @args;
+  -ms-transform: @args; 	/* IE 9 */
+  -moz-transform: @args; 	/* Firefox */
+  -webkit-transform: @args; /* Safari 和 Chrome */
+  -o-transform: @args;
+}
+
+.transition(@args) {
+  transition: @args;
+  -moz-transition: @args;      /* Firefox 4 */
+  -webkit-transition: @args;   /* Safari 和 Chrome */
+  -o-transition: @args;        /* Opera */
+}
+

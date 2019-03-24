@@ -1,0 +1,77 @@
+@import (reference) "../../../common/common.less";
+
+@wrapper: ~"@{prefix}-list";
+
+.@{wrapper} {
+  background-color: @white;
+
+  &-link {
+    margin-left: @gap-large;
+    color: #108ee9;
+  }
+
+  &-input {
+    width: 50%;
+  }
+
+  &-link-download {
+    margin-left: @gap;
+  }
+
+  &-unit {
+    margin-left: @gap;
+  }
+
+  &-apply {
+    text-align: center;
+    &-img {
+      width: 252px;
+      height: 160px;
+    }
+    &-text {
+      font-size: 16px;
+      margin: 4 * @gap;
+      color: #666;
+    }
+  }
+
+  &-material-link {
+    height: 110px;
+    background-color: #eeefef;
+    margin: 10px 0;
+    padding: 10px;
+    &-text {
+      height: 20px;
+      line-height: 20px;
+    }
+    &-img {
+      height: 60px;
+      margin: 5px 0;
+      background: no-repeat left center;
+      background-size: contain;
+    }
+  }
+
+  &-table-column-center * {
+    text-align: center !important;
+  }
+
+  &-button {
+    border-radius: @button-border-radius;
+  }
+
+  &-button-forbid {
+    border-radius: 4px !important;
+    color: #FFF !important;
+    background-color: #9B9B9B !important;
+  }
+
+  &-footer {
+    margin: 10px 0;
+    border-radius: 0 0 4px 4px;
+  }
+
+  &-button-right {
+    margin-left: @gap;
+  }
+}

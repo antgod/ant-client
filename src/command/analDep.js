@@ -93,7 +93,7 @@ const traverseEntry = (absoluteEntry, absoluteProject) => {
       }
     }
   } catch(e) {
-    log(chalk.red(`${absoluteEntry}文件不存在`))
+    log(chalk.red(`${absoluteEntry} file or direction not exist`))
   }
   const deps = extName ? [] : fileMods(code.toString())
   return deps.reduce((last, dep) => assign(last, requireCompute(dep, isDir, absoluteEntry, absoluteProject), {}), {})

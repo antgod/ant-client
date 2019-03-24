@@ -45,6 +45,13 @@ const DEFAULT_PLUGINS = [
 ]
 const DEFAULT_SOURCE_TYPE = 'module'
 
+const REQUIRE = 'require'
+const DEFAULT_ENTRY = './src/index'
+const DEFAULT_ALIAS = ['.js', '.jsx', '.json']
+const NODE_MODULES = 'node_modules'
+const OUTPUT_TYPE = { CONSOLE: 'c', FILE: 'f' }
+const NPMS = 'npms'
+
 module.exports = {
   NODE_TYPES,
   USEFUL_IDENTIFIER_COLUMNS,
@@ -54,4 +61,10 @@ module.exports = {
   SPEC_TYPES,
   DEFAULT_PLUGINS,
   DEFAULT_SOURCE_TYPE,
+  REQUIRE,
+  DEFAULT_ENTRY,
+  DEFAULT_ALIAS,
+  NODE_MODULES,
+  OUTPUT_TYPE,
+  NPMS,
 }
